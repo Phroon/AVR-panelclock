@@ -1,6 +1,7 @@
 AVR Panel Meter Clock
-
 GPLv2 or later
+
+setter directory contains an Arduino sketch for setting the current time to the ChronoDot.
 
 Uses I2C Master library by Peter Fleury
 http://homepage.hispeed.ch/peterfleury/group__pfleury__ic2master.html
