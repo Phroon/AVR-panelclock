@@ -17,11 +17,21 @@ void setup()
   Wire.endTransmission();
   */
   
+  //Set Time
   /*
   Wire.beginTransmission(0x68);
   Wire.write(0); // start at register 0
-  uint8_t time[3] = {0b0,0b01010000,0b00010111};
+  uint8_t time[3] = {0b0,0b01011001,0b00010110};
   Wire.write(time,3);
+  Wire.endTransmission();
+  */
+  
+  //Set Date
+  /*
+  Wire.beginTransmission(0x68);
+  Wire.write(0x03); // start at register 0
+  uint8_t time[4] = {0b00000001,0b00000011,0b00000110,0b00010010};
+  Wire.write(time,4);
   Wire.endTransmission();
   */
 }
