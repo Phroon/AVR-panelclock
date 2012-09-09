@@ -37,8 +37,9 @@
 
 #include <avr/io.h>
 #include "i2cmaster.h"
+#include "millis.h"
 
-#define DevChronodot 0b1101000 //0x68;
+#define DevChronodot 0x68
 
 int main(void)
 {
@@ -47,22 +48,23 @@ int main(void)
 	uint8_t seconds;
 	uint8_t minutes;
 	uint8_t hours;
-	
 	i2c_init();								// init I2C interface
 	
 	i2c_start_wait(DevChronodot+I2C_WRITE);	// set device address and write mode
 	i2c_write(0x00);						// write address = 0
 	
 	i2c_rep_start(DevChronodot+I2C_READ);       // set device address and read mode
-	sec = i2c_readAck();                    // read one byte form address 0
-	min = i2c_readAck();                    //  "    "    "    "     "    1
-	hr = i2c_readNak();                    //  "    "    "    "     "    2
-	i2c_stop();								// set stop condition = release bus
+	seconds = i2c_readAck();                    // read one byte form address 0
+	minutes = i2c_readAck();                    //  "    "    "    "     "    1
+	hours = i2c_readNak();                      //  "    "    "    "     "    2
+	i2c_stop();                                 // set stop condition = release bus
 	
     seconds = (((seconds & 0b11110000)>>4)*10 + (seconds & 0b00001111)); // convert BCD to decimal
     minutes = (((minutes & 0b11110000)>>4)*10 + (minutes & 0b00001111)); // convert BCD to decimal
     hours = (((hours & 0b00100000)>>5)*20 + ((hours & 0b00010000)>>4)*10 + (hours & 0b00001111)); // convert BCD to decimal (assume 24 hour mode)
     
+	millis();
+	
 	for(;;);
 }
 
