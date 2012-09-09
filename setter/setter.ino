@@ -34,6 +34,14 @@ void setup()
   Wire.write(time,4);
   Wire.endTransmission();
   */
+  
+  //Setup SQW pin for 1024Hz operation
+  /*
+  Wire.beginTransmission(0x68); // address DS3231
+  Wire.write(0x0E); // select register
+  Wire.write(0b00001000); // write register bitmap, bits 2,3,4 is INTCN,RS1,RS2
+  Wire.endTransmission();
+  */
 }
  
 void loop()
