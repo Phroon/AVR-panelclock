@@ -14,13 +14,13 @@
 #                is connected.
 # FUSES ........ Parameters for avrdude to flash the fuses appropriately.
 
-DEVICE     = attiny85
+DEVICE     = attiny2313
 CLOCK      = 1000000
 # PROGRAMMER = -c stk500v2 -P avrdoper
-PROGRAMMER = -p t85 -c avrisp -b 19200 -P /dev/tty.usbserial-A6008eGn 
+PROGRAMMER = -p $(DEVICE) -c avrisp -b 19200 -P /dev/tty.usbserial-A6008eGn 
 # PROGRAMMER = -p t85 -c avrispv2 -P usb
 
-OBJECTS    = main.o i2cmaster.o millis.o
+OBJECTS    = main.o i2cmaster.o #millis.o
 # FUSES      = -U hfuse:w:0xd9:m -U lfuse:w:0x24:m
 
 # ATMega8 fuse bits (fuse bits for other devices are different!):
