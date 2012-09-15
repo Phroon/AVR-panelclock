@@ -77,10 +77,18 @@ i2c_delay_T2:        ; 4 cycles
 2:	rjmp 3f      ; 2   "
 3:	rjmp 4f      ; 2   "
 4:	rjmp 5f      ; 2   "
-5: 	rjmp 6f      ; 2   "
+5:	rjmp 6f      ; 2   "
 6:	nop          ; 1   "
+	rjmp 7f      ; 2   "?
+7:  rjmp 8f      ; 2   "?
+8:  rjmp 9f      ; 2   "?
+9:  rjmp 10f     ; 2   "?
+10: rjmp 11f     ; 2   "?
+11: rjmp 12f     ; 2   "?
+12: nop          ; 1   "?
 	ret          ; 3   "
-	.endfunc     ; total 20 cyles = 5.0 microsec with 4 Mhz crystal 
+	.endfunc     ; total 33 cyles = 4.125 microsec with 8 Mhz crystal
+	             ; this could be longer, but it works
 
 
 ;*************************************************************************

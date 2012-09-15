@@ -47,9 +47,11 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <stdint.h>
+#include <util/delay.h>
 #include "i2cmaster.h"
 
-#define DevChronodot 0x68
+#define DevChronodot 0xd0 //OH SCIENCE ARDUINO DOES THIS DIFFERENTLY
+						  //they use the 7 bit address, Fleury uses 8 bit
 
 #define tic_second 0x11	    // (0xFF*(1/60))*2^2
 #define tic_minute 0x11		// (0xFF*(1/60))*2^2
@@ -64,14 +66,28 @@ uint16_t volatile hr;
 
 int main(void)
 {
+	
+	DDRB |= _BV(DDB2) | _BV(DDB3) | _BV(DDB4); //Pins as output pg.70
+	DDRD |= _BV(DDD5) | _BV(DDD4);
 
 	//unsigned char ret;
 	uint8_t seconds;
 	uint8_t minutes;
 	uint8_t hours;
+	uint8_t status;
 	i2c_init();								// init I2C interface
+	status = i2c_start(DevChronodot+I2C_WRITE);	// set device address and write mode
+	while (status) {
+		i2c_stop();
+		_delay_ms(1000);
+		PORTD |= _BV(PORTD4);
+		_delay_ms(1000);
+		PORTD &= ~_BV(PORTD4);
+		status = i2c_start(DevChronodot+I2C_WRITE);
+	}
+
+	// i2c_start_wait hangs for some reason?
 	
-	i2c_start_wait(DevChronodot+I2C_WRITE);	// set device address and write mode
 	i2c_write(0x00);						// write address = 0
 	
 	i2c_rep_start(DevChronodot+I2C_READ);       // set device address and read mode
@@ -80,9 +96,9 @@ int main(void)
 	hours = i2c_readNak();                      //  "    "    "    "     "    2
 	i2c_stop();                                 // set stop condition = release bus
 	
-    seconds = (((seconds & 0b11110000)>>4)*10 + (seconds & 0b00001111)); // convert BCD to decimal
-    minutes = (((minutes & 0b11110000)>>4)*10 + (minutes & 0b00001111)); // convert BCD to decimal
-    hours = (((hours & 0b00100000)>>5)*20 + ((hours & 0b00010000)>>4)*10 + (hours & 0b00001111)); // convert BCD to decimal (assume 24 hour mode)
+	seconds = (((seconds & 0b11110000)>>4)*10 + (seconds & 0b00001111)); // convert BCD to decimal
+	minutes = (((minutes & 0b11110000)>>4)*10 + (minutes & 0b00001111)); // convert BCD to decimal
+	hours = (((hours & 0b00100000)>>5)*20 + ((hours & 0b00010000)>>4)*10 + (hours & 0b00001111)); // convert BCD to decimal (assume 24 hour mode)
  
 	sec = seconds * tic_second;
 	min = minutes * tic_minute;
@@ -95,6 +111,7 @@ int main(void)
 	
 	//Enable INT0 interrupt on rising edge pg.51
 	MCUCR |= _BV(ISC01) | _BV(ISC00);
+	GIMSK |= _BV(INT0); // Enable Interrupt
 	
 	//Set up Fast PWM on Timer 0, OC0A & OC0B pg.82
 	TCCR0A |= _BV(COM0A1)  //Clear OC0A on compare match, set OC0A at TOP
@@ -112,12 +129,8 @@ int main(void)
 			
 	//TIMSK	|= ???  //Timer Interupts pg.166
 	
-	DDRB |= _BV(DDB2) | _BV(DDB3) | _BV(DDB4); //Pins as output pg.70
-	DDRD |= _BV(DDD5);
 	
 	sei(); // Enable Interrupts
-	
-	//millis();
 	
 	for(;;);
 }
@@ -155,7 +168,7 @@ void update_meters(void)
 {
 	OCR0B = sec >> 2;
 	OCR1A = min >> 2;
-	OCR1B   = hr >> 3;
+	OCR1B = hr >> 3;
 }
 
 ISR(INT0_vect)
